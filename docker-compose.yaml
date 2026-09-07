@@ -1,0 +1,120 @@
+# Shared application build and dependency configuration.
+x-app: &app
+  build: .
+  depends_on:
+    db:
+      condition: service_healthy
+    rabbitmq:
+      condition: service_healthy
+  restart: no
+
+x-env: &env
+  HTTP_PORT: "${HTTP_PORT}"
+  ORDER_HTTP_PORT: "${ORDER_HTTP_PORT:-8080}"
+  INVENTORY_HTTP_PORT: "${INVENTORY_HTTP_PORT:-8081}"
+  NOTIFICATION_HTTP_PORT: "${NOTIFICATION_HTTP_PORT:-8082}"
+  PAYMENT_HTTP_PORT: "${PAYMENT_HTTP_PORT:-8083}"
+  DB_HOST: "${DB_HOST}"
+  DB_USER: "${DB_USER}"
+  DB_PASSWORD: "${DB_PASSWORD}"
+  DB_PORT: "${DB_PORT}"
+  DB_SSLMODE: "${DB_SSLMODE}"
+  DB_ORDER_NAME: "${DB_ORDER_NAME:-order_db}"
+  DB_INVENTORY_NAME: "${DB_INVENTORY_NAME:-inventory_db}"
+  DB_NOTIFICATION_NAME: "${DB_NOTIFICATION_NAME:-notification_db}"
+  DB_PAYMENT_NAME: "${DB_PAYMENT_NAME:-payment_db}"
+  MQ_USER: "${MQ_USER}"
+  MQ_PASSWORD: "${MQ_PASSWORD}"
+  MQ_HOST: "${MQ_HOST}"
+  MQ_PORT: "${MQ_PORT}"
+  MQ_VHOST: "${MQ_VHOST}"
+
+services:
+  order:
+    <<: *app
+    command: ["/bin/order"]
+    container_name: ops_order
+    environment:
+      <<: *env
+      HTTP_PORT: "${ORDER_HTTP_PORT:-8080}"
+      DB_NAME: "${DB_ORDER_NAME:-order_db}"
+    ports:
+      - "${ORDER_HTTP_PORT:-8080}:${ORDER_HTTP_PORT:-8080}"
+
+  inventory:
+    <<: *app
+    command: ["/bin/inventory"]
+    container_name: ops_inventory
+    environment:
+      <<: *env
+      HTTP_PORT: "${INVENTORY_HTTP_PORT:-8081}"
+      DB_NAME: "${DB_INVENTORY_NAME:-inventory_db}"
+    ports:
+      - "${INVENTORY_HTTP_PORT:-8081}:${INVENTORY_HTTP_PORT:-8081}"
+
+  notification:
+    <<: *app
+    command: ["/bin/notification"]
+    container_name: ops_notification
+    environment:
+      <<: *env
+      HTTP_PORT: "${NOTIFICATION_HTTP_PORT:-8082}"
+      DB_NAME: "${DB_NOTIFICATION_NAME:-notification_db}"
+    ports:
+      - "${NOTIFICATION_HTTP_PORT:-8082}:${NOTIFICATION_HTTP_PORT:-8082}"
+
+  payment:
+    <<: *app
+    command: ["/bin/payment"]
+    container_name: ops_payment
+    environment:
+      <<: *env
+      HTTP_PORT: "${PAYMENT_HTTP_PORT:-8083}"
+      DB_NAME: "${DB_PAYMENT_NAME:-payment_db}"
+    ports:
+      - "${PAYMENT_HTTP_PORT:-8083}:${PAYMENT_HTTP_PORT:-8083}"
+
+  db:
+    image: postgres:15
+    container_name: ops_db
+    ports:
+      - "${DB_PORT}:${DB_PORT}"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    restart: no
+    environment:
+      POSTGRES_USER: "${DB_USER}"
+      POSTGRES_PASSWORD: "${DB_PASSWORD}"
+      POSTGRES_DB: "${DB_ORDER_NAME:-order_db}"
+      DB_ORDER_NAME: "${DB_ORDER_NAME:-order_db}"
+      DB_INVENTORY_NAME: "${DB_INVENTORY_NAME:-inventory_db}"
+      DB_NOTIFICATION_NAME: "${DB_NOTIFICATION_NAME:-notification_db}"
+      DB_PAYMENT_NAME: "${DB_PAYMENT_NAME:-payment_db}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    image: rabbitmq:4.3.4-management
+    container_name: opsmq
+    ports:
+      - "${MQ_PORT}:${MQ_PORT}" # for AMQP
+      - 15672:15672 # UI management
+    volumes:
+      - mq_data:/var/lib/rabbitmq
+    restart: no
+    environment:
+      RABBITMQ_DEFAULT_USER: "${MQ_USER}"
+      RABBITMQ_DEFAULT_PASS: "${MQ_PASSWORD}"
+      RABBITMQ_DEFAULT_VHOST: "${MQ_VHOST}"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
+  mq_data:
