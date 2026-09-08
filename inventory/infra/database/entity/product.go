@@ -7,6 +7,7 @@ type ProductEntity struct {
 	Name      string
 	ImageURL  string
 	Available int
+	Price     int64
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

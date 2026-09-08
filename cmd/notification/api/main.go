@@ -2,16 +2,14 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
 	notificationusecase "ops/notification/application/usecase"
 	notificationhandler "ops/notification/delivery/rest/handler"
+	"ops/notification/delivery/rest/router"
 	notificationdb "ops/notification/infra/database"
 	"ops/shared/config"
 	"ops/shared/server"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -26,25 +24,17 @@ func main() {
 		panic(err)
 	}
 
+	appServer := server.New(env)
+
 	repository := notificationdb.NewRepository(db)
 	getNotificationsUseCase := notificationusecase.NewGetNotificationsUseCase(repository)
 	createNotificationUseCase := notificationusecase.NewCreateUseCase(repository)
 	h := notificationhandler.NewHandler(getNotificationsUseCase, createNotificationUseCase)
 	_ = h
 
-	appServer := server.New(env)
-	api := appServer.Group("/api")
-	api.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"module": "notification",
-			"status": "healthy",
-		})
-	})
+	router.NewRoutes(appServer)
 
 	port := env.HTTP.NotificationPort
-	if port == 0 {
-		port = env.HTTP.Port
-	}
 	if port == 0 {
 		port = 8082
 	}

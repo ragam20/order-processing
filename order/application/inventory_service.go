@@ -1,7 +1,12 @@
 package application
 
-import "context"
+import (
+	"context"
+
+	"ops/order/application/in"
+	"ops/order/application/out"
+)
 
 type InventoryService interface {
-	CheckavailabilityItem(ctx context.Context)
+	CheckAvailabilityItem(ctx context.Context, input in.CheckoutInput) ([]out.ItemAvailability, error)
 }

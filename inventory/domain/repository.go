@@ -9,4 +9,5 @@ type Repository interface {
 	Update(ctx context.Context, product *Product) error
 	GetProducts(ctx context.Context) []Product
 	GetProductByID(ctx context.Context, productID int64) (*Product, error)
+	GetProductByIDs(ctx context.Context, ids []int64) ([]Product, error)
 }

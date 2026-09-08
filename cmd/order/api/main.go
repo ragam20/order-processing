@@ -44,9 +44,6 @@ func main() {
 
 	port := env.HTTP.OrderPort
 	if port == 0 {
-		port = env.HTTP.Port
-	}
-	if port == 0 {
 		port = 8080
 	}
 

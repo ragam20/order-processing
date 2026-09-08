@@ -2,16 +2,14 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
 	inventoryusecase "ops/inventory/application/usecase"
 	inventoryhandler "ops/inventory/delivery/rest/handler"
+	"ops/inventory/delivery/rest/router"
 	inventorydb "ops/inventory/infra/database"
 	"ops/shared/config"
 	"ops/shared/server"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -26,25 +24,19 @@ func main() {
 		panic(err)
 	}
 
+	appServer := server.New(env)
+
 	repository := inventorydb.NewRepository(db)
+
 	getProductsUseCase := inventoryusecase.NewGetProductsUseCase(repository)
 	getProductByIDUseCase := inventoryusecase.NewGetProductByIDUseCase(repository)
-	h := inventoryhandler.NewHandler(getProductsUseCase, getProductByIDUseCase)
-	_ = h
+	checkAvailabilityUseCase := inventoryusecase.NewCheckAvailability(repository)
 
-	appServer := server.New(env)
-	api := appServer.Group("/api")
-	api.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"module": "inventory",
-			"status": "healthy",
-		})
-	})
+	h := inventoryhandler.NewHandler(getProductsUseCase, getProductByIDUseCase, checkAvailabilityUseCase)
+
+	router.NewRoutes(appServer, h)
 
 	port := env.HTTP.InventoryPort
-	if port == 0 {
-		port = env.HTTP.Port
-	}
 	if port == 0 {
 		port = 8081
 	}

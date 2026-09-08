@@ -6,10 +6,10 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -o /bin/order ./cmd/order && \
-  go build -o /bin/inventory ./cmd/inventory && \
-  go build -o /bin/notification ./cmd/notification && \
-  go build -o /bin/payment ./cmd/payment
+RUN go build -o /bin/order ./cmd/api/order && \
+  go build -o /bin/inventory ./cmd/api/inventory && \
+  go build -o /bin/notification ./cmd/api/notification && \
+  go build -o /bin/payment ./cmd/api/payment
 
 FROM alpine:3
 

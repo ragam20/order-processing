@@ -1,12 +1,13 @@
 package app
 
 const (
-	CodeNotFound      = "NOT_FOUND"
-	CodeInvalidInput  = "INVALID_INPUT"
-	CodeConflict      = "CONFLICT"
-	CodeUnauthorized  = "UNAUTHORIZED"
-	CodeForbidden     = "FORBIDDEN"
-	CodeInternalError = "INTERNAL_ERROR"
+	CodeNotFound       = "NOT_FOUND"
+	CodeInvalidInput   = "INVALID_INPUT"
+	CodeConflict       = "CONFLICT"
+	CodeUnauthorized   = "UNAUTHORIZED"
+	CodeForbidden      = "FORBIDDEN"
+	CodeInternalError  = "INTERNAL_ERROR"
+	CodeInvalidRequest = "INVALID_REQUEST"
 )
 
 type AppError struct {

@@ -8,11 +8,15 @@ import (
 
 type Env struct {
 	HTTP struct {
-		Port             int `mapstructure:"http_port"`
 		OrderPort        int `mapstructure:"order_http_port"`
 		InventoryPort    int `mapstructure:"inventory_http_port"`
 		NotificationPort int `mapstructure:"notification_http_port"`
 		PaymentPort      int `mapstructure:"payment_http_port"`
+
+		OrderURL        string `mapstructure:"order_service_url"`
+		InventoryURL    string `mapstructure:"inventory_service_url"`
+		NotificationURL string `mapstructure:"notification_service_url"`
+		PaymentURL      string `mapstructure:"payment_service_url"`
 	}
 	MQ struct {
 		Port     int    `mapstructure:"mq_port"`
@@ -42,8 +46,8 @@ type Env struct {
 
 func getKey() []string {
 	return []string{
-		"http_port",
 		"order_http_port", "inventory_http_port", "notification_http_port", "payment_http_port",
+		"order_service_url", "inventory_service_url", "notification_service_url", "payment_service_url",
 		"db_host", "db_user", "db_name", "db_port", "db_password", "db_sslmode",
 		"db_order_name", "db_inventory_name", "db_notification_name", "db_payment_name",
 		"mq_port", "mq_user", "mq_host", "mq_password", "mq_vhost",

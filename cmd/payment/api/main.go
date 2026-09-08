@@ -2,16 +2,14 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
 	paymentusecase "ops/payment/application/usecase"
 	paymenthandler "ops/payment/delivery/rest/handler"
+	"ops/payment/delivery/rest/router"
 	paymentdb "ops/payment/infra/database"
 	"ops/shared/config"
 	"ops/shared/server"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -26,23 +24,15 @@ func main() {
 		panic(err)
 	}
 
+	appServer := server.New(env)
+
 	processPaymentUseCase := paymentusecase.NewProcessPaymentUseCase()
 	h := paymenthandler.NewHandler(processPaymentUseCase)
 	_ = h
 
-	appServer := server.New(env)
-	api := appServer.Group("/api")
-	api.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"module": "payment",
-			"status": "healthy",
-		})
-	})
+	router.NewRoutes(appServer)
 
 	port := env.HTTP.PaymentPort
-	if port == 0 {
-		port = env.HTTP.Port
-	}
 	if port == 0 {
 		port = 8083
 	}

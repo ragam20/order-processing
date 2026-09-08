@@ -18,7 +18,7 @@ func NewRepository(db *gorm.DB) domain.Repository {
 }
 
 func (r *repository) Create(ctx context.Context, product *domain.Product) error {
-	if err := r.db.Create(entity.ProductEntity{
+	if err := r.db.WithContext(ctx).Create(entity.ProductEntity{
 		ID:        product.ID,
 		Name:      product.Name,
 		Available: product.Available,
@@ -29,6 +29,30 @@ func (r *repository) Create(ctx context.Context, product *domain.Product) error 
 		return err
 	}
 	return nil
+}
+
+func (r *repository) GetProductByIDs(ctx context.Context, ids []int64) ([]domain.Product, error) {
+	var e []entity.ProductEntity
+
+	if err := r.db.WithContext(ctx).
+		Where("id IN ?", ids).Find(&e).Error; err != nil {
+		return nil, err
+	}
+
+	d := make([]domain.Product, 0, len(e))
+	for _, v := range e {
+		d = append(d, domain.Product{
+			ID:        v.ID,
+			Name:      v.Name,
+			Available: v.Available,
+			ImageURL:  v.ImageURL,
+			Price:     v.Price,
+			CreatedAt: v.CreatedAt,
+			UpdatedAt: v.UpdatedAt,
+		})
+	}
+
+	return d, nil
 }
 
 func (r *repository) Update(ctx context.Context, product *domain.Product) error {
