@@ -2,17 +2,16 @@ package entity
 
 import (
 	"time"
-
-	"github.com/shopspring/decimal"
 )
 
 type OrderItemEntity struct {
 	ID int64 `gorm:"autoIncrement;primaryKey"`
 
-	OrderID int64
+	OrderID   int64
+	ProductID int64
 
 	Name     string
-	Price    decimal.Decimal `gorm:"type:decimal(20,2);not null"`
+	Price    int64 `gorm:"not null"`
 	Quantity int32
 
 	CreatedAt time.Time

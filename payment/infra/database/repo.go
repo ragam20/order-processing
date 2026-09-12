@@ -19,13 +19,17 @@ func NewRepository(db *gorm.DB) domain.Repository {
 
 func (r *repository) Create(ctx context.Context, payment *domain.Payment, orderID int64) error {
 	e := entity.PaymentEntity{
-		ID:               payment.ID,
-		OrderID:          orderID,
-		Status:           payment.Status,
-		Provider:         payment.Provider,
-		ResponseProvider: payment.ResponseProvider,
-		CreatedAt:        payment.CreatedAt,
-		UpdatedAt:        payment.UpdatedAt,
+		ID:                    payment.ID,
+		OrderID:               orderID,
+		Status:                payment.Status,
+		Provider:              payment.Provider,
+		ProviderReference:     payment.ProviderReference,
+		ProviderTransactionID: payment.ProviderTransactionID,
+		CheckoutURL:           payment.CheckoutURL,
+		PaymentToken:          payment.PaymentToken,
+		ResponseProvider:      payment.ResponseProvider,
+		CreatedAt:             payment.CreatedAt,
+		UpdatedAt:             payment.UpdatedAt,
 	}
 	if err := r.db.WithContext(ctx).Create(&e).Error; err != nil {
 		return err
@@ -36,13 +40,17 @@ func (r *repository) Create(ctx context.Context, payment *domain.Payment, orderI
 
 func (r *repository) Update(ctx context.Context, payment *domain.Payment, orderID int64) error {
 	e := entity.PaymentEntity{
-		ID:               payment.ID,
-		OrderID:          orderID,
-		Status:           payment.Status,
-		Provider:         payment.Provider,
-		ResponseProvider: payment.ResponseProvider,
-		CreatedAt:        payment.CreatedAt,
-		UpdatedAt:        payment.UpdatedAt,
+		ID:                    payment.ID,
+		OrderID:               orderID,
+		Status:                payment.Status,
+		Provider:              payment.Provider,
+		ProviderReference:     payment.ProviderReference,
+		ProviderTransactionID: payment.ProviderTransactionID,
+		CheckoutURL:           payment.CheckoutURL,
+		PaymentToken:          payment.PaymentToken,
+		ResponseProvider:      payment.ResponseProvider,
+		CreatedAt:             payment.CreatedAt,
+		UpdatedAt:             payment.UpdatedAt,
 	}
 	if err := r.db.WithContext(ctx).Model(&e).Updates(&e).Error; err != nil {
 		return err

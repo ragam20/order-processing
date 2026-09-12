@@ -8,6 +8,7 @@ import (
 	paymenthandler "ops/payment/delivery/rest/handler"
 	"ops/payment/delivery/rest/router"
 	paymentdb "ops/payment/infra/database"
+	"ops/payment/infra/provider/midtrans"
 	"ops/shared/config"
 	"ops/shared/server"
 )
@@ -26,11 +27,14 @@ func main() {
 
 	appServer := server.New(env)
 
+	repository := paymentdb.NewRepository(db)
+	provider := midtrans.New(env)
 	processPaymentUseCase := paymentusecase.NewProcessPaymentUseCase()
-	h := paymenthandler.NewHandler(processPaymentUseCase)
-	_ = h
+	createPaymentUseCase := paymentusecase.NewCreatePaymentUseCase(repository, provider)
+	getStatusPaymentUseCase := paymentusecase.NewGetPaymentStatus(provider)
+	h := paymenthandler.NewHandler(processPaymentUseCase, createPaymentUseCase, getStatusPaymentUseCase)
 
-	router.NewRoutes(appServer)
+	router.NewRoutes(appServer, h)
 
 	port := env.HTTP.PaymentPort
 	if port == 0 {

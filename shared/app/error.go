@@ -8,6 +8,8 @@ const (
 	CodeForbidden      = "FORBIDDEN"
 	CodeInternalError  = "INTERNAL_ERROR"
 	CodeInvalidRequest = "INVALID_REQUEST"
+
+	CodePaymentCreationFailed = "PAYMENT_CREATION_FAILED"
 )
 
 type AppError struct {

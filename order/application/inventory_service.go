@@ -8,5 +8,5 @@ import (
 )
 
 type InventoryService interface {
-	CheckAvailabilityItem(ctx context.Context, input in.CheckoutInput) ([]out.ItemAvailability, error)
+	CheckAvailabilityItem(ctx context.Context, input in.CheckoutInput) ([]out.AvailabilityItems, error)
 }

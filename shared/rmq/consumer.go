@@ -6,27 +6,26 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-type Dispatcher interface {
-	Dispatch(ctx context.Context)
+type ConsumerConfig struct {
+	ExchangeName string
+	ExchangeType string
+	QueueName    string
+	BindingKey   string
 }
+
+type MessageHandler func(ctx context.Context, message amqp.Delivery) error
 
 type Consumer struct {
 	conn       *amqp.Connection
 	channel    *amqp.Channel
 	deliveries <-chan amqp.Delivery
-
-	exchangeName string
-	kind         string
-	queueName    string
-	bindKey      string
+	handler    MessageHandler
 }
 
 func NewConsumer(
 	conn *amqp.Connection,
-	exchangeName string,
-	kind string,
-	queueName string,
-	bindKey string,
+	config ConsumerConfig,
+	handler MessageHandler,
 ) (*Consumer, error) {
 	ch, err := conn.Channel()
 	if err != nil {
@@ -34,8 +33,8 @@ func NewConsumer(
 	}
 
 	err = ch.ExchangeDeclare(
-		exchangeName,
-		kind,
+		config.ExchangeName,
+		config.ExchangeType,
 		true,
 		false,
 		false,
@@ -48,11 +47,11 @@ func NewConsumer(
 	}
 
 	args := amqp.Table{
-		"x-queue-type": "qurom",
+		"x-queue-type": "quorum",
 	}
 
 	q, err := ch.QueueDeclare(
-		queueName,
+		config.QueueName,
 		true,
 		false,
 		false,
@@ -66,8 +65,8 @@ func NewConsumer(
 
 	err = ch.QueueBind(
 		q.Name,
-		bindKey,
-		exchangeName,
+		config.BindingKey,
+		config.ExchangeName,
 		false,
 		nil,
 	)
@@ -77,7 +76,7 @@ func NewConsumer(
 	}
 
 	deliveries, err := ch.Consume(
-		queueName,
+		config.QueueName,
 		"",
 		false,
 		false,
@@ -94,11 +93,7 @@ func NewConsumer(
 		conn:       conn,
 		channel:    ch,
 		deliveries: deliveries,
-
-		exchangeName: exchangeName,
-		kind:         kind,
-		queueName:    queueName,
-		bindKey:      bindKey,
+		handler:    handler,
 	}, nil
 }
 
@@ -113,10 +108,16 @@ func (c *Consumer) Start(ctx context.Context) {
 			case <-ctx.Done():
 				return
 
-			case _, ok := <-c.deliveries:
+			case delivery, ok := <-c.deliveries:
 				if !ok {
 					return
 				}
+
+				if err := c.handler(ctx, delivery); err != nil {
+					_ = delivery.Nack(false, false)
+				}
+
+				_ = delivery.Ack(false)
 			}
 		}
 	}()

@@ -43,6 +43,10 @@ func New(env *config.Env) application.PaymentProvider {
 	}
 }
 
+func (mt *midtransProvider) GetProviderName() string {
+	return "Midtrans"
+}
+
 func (mt *midtransProvider) CreatePayment(ctx context.Context, input in.CreatePaymentInput) (out.PaymentResult, error) {
 	var mdItems *[]midtrans.ItemDetails
 	result := make([]midtrans.ItemDetails, 0, len(input.Items))

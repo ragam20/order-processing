@@ -2,8 +2,6 @@ package domain
 
 import (
 	"time"
-
-	"github.com/shopspring/decimal"
 )
 
 type OrderStatus string
@@ -17,7 +15,7 @@ var (
 
 type Order struct {
 	ID          int64
-	Total       decimal.Decimal
+	Total       int64
 	Status      OrderStatus
 	CancelledAt *time.Time
 	CompletedAt *time.Time
@@ -54,10 +52,11 @@ func (o *Order) Cancel() error {
 }
 
 type OrderItem struct {
-	ID int64
+	ID        int64
+	ProductID int64
 
 	Name     string
-	Price    decimal.Decimal
+	Price    int64
 	Quantity int32
 
 	CreatedAt time.Time

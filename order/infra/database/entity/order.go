@@ -2,13 +2,11 @@ package entity
 
 import (
 	"time"
-
-	"github.com/shopspring/decimal"
 )
 
 type OrderEntity struct {
-	ID          int64           `gorm:"autoIncrement;primaryKey"`
-	Total       decimal.Decimal `gorm:"type:decimal(20,2);not null"`
+	ID          int64 `gorm:"autoIncrement;primaryKey"`
+	Total       int64 `gorm:"not null"`
 	Status      string
 	CancelledAt *time.Time
 	CompletedAt *time.Time

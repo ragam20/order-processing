@@ -1,6 +1,6 @@
 package out
 
-type ItemAvailability struct {
+type AvailabilityItems struct {
 	ProductID   int64
 	Name        string
 	Price       int64

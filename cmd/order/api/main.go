@@ -2,16 +2,16 @@ package main
 
 import (
 	"fmt"
-	"net/http"
 	"os"
 
 	orderusecase "ops/order/application/usecase"
 	orderhandler "ops/order/delivery/rest/handler"
+	"ops/order/delivery/rest/router"
 	orderdb "ops/order/infra/database"
+	"ops/order/infra/inventory"
+	"ops/order/infra/payment"
 	"ops/shared/config"
 	"ops/shared/server"
-
-	"github.com/gin-gonic/gin"
 )
 
 func main() {
@@ -26,21 +26,21 @@ func main() {
 		panic(err)
 	}
 
+	appServer := server.New(env)
+
 	repo := orderdb.NewRepository(db)
 
-	cancelOrderUseCase := orderusecase.NewCancelOrderUseCase(repo)
-	getDetailOrderUseCase := orderusecase.NewGetDetailOrderUseCase(repo)
-	h := orderhandler.NewHandler(cancelOrderUseCase, getDetailOrderUseCase)
-	_ = h
+	// internal service
+	inventorySvc := inventory.New(env)
+	paymentSvc := payment.New(env)
 
-	appServer := server.New(env)
-	api := appServer.Group("/api")
-	api.GET("/health", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"module": "order",
-			"status": "healthy",
-		})
-	})
+	cancelOrderUC := orderusecase.NewCancelOrderUseCase(repo)
+	getDetailOrderUC := orderusecase.NewGetDetailOrderUseCase(repo)
+	checkoutUC := orderusecase.NewCheckoutUseCase(repo, inventorySvc, paymentSvc)
+
+	h := orderhandler.NewHandler(cancelOrderUC, getDetailOrderUC, checkoutUC)
+
+	router.NewRoutes(appServer, h)
 
 	port := env.HTTP.OrderPort
 	if port == 0 {

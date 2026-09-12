@@ -3,10 +3,12 @@ package router
 import (
 	"net/http"
 
+	"ops/payment/delivery/rest/handler"
+
 	"github.com/gin-gonic/gin"
 )
 
-func NewRoutes(g *gin.Engine) {
+func NewRoutes(g *gin.Engine, h *handler.Handler) {
 	api := g.Group("/api")
 
 	internal := api.Group("/internal/payment")
@@ -17,5 +19,7 @@ func NewRoutes(g *gin.Engine) {
 				"message": "payment service - ok",
 			})
 		})
+		internal.POST("/", h.CreatePayment)
+		internal.GET("/status/:providerReference", h.GetStatusPayment)
 	}
 }

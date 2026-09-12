@@ -3,6 +3,7 @@ package out
 import "encoding/json"
 
 type PaymentResult struct {
+	Status                string
 	ProviderReference     string
 	ProviderTransactionID string
 	CheckoutURL           string

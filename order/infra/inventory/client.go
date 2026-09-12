@@ -21,13 +21,13 @@ func New(env *config.Env) application.InventoryService {
 	return &inventoryClient{env: env}
 }
 
-func (c *inventoryClient) CheckAvailabilityItem(ctx context.Context, input in.CheckoutInput) ([]out.ItemAvailability, error) {
+func (c *inventoryClient) CheckAvailabilityItem(ctx context.Context, input in.CheckoutInput) ([]out.AvailabilityItems, error) {
 	itemReq := CheckAvailabilityRequest{
 		Items: make([]ItemRequest, 0, len(input.Items)),
 	}
 	for _, v := range input.Items {
 		itemReq.Items = append(itemReq.Items, ItemRequest{
-			ProductID: v.ItemID,
+			ProductID: v.ProductID,
 			Quantity:  v.Quantity,
 		})
 	}
@@ -67,9 +67,9 @@ func (c *inventoryClient) CheckAvailabilityItem(ctx context.Context, input in.Ch
 		return nil, err
 	}
 
-	result := make([]out.ItemAvailability, 0, len(res.Data))
+	result := make([]out.AvailabilityItems, 0, len(res.Data))
 	for _, item := range res.Data {
-		result = append(result, out.ItemAvailability{
+		result = append(result, out.AvailabilityItems{
 			ProductID:   item.ProductID,
 			Name:        item.Name,
 			Quantity:    item.Quantity,

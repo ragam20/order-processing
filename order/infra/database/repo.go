@@ -18,34 +18,52 @@ func NewRepository(db *gorm.DB) domain.Repository {
 	return &repository{db: db}
 }
 
-func (r *repository) Create(ctx context.Context, order *domain.Order) error {
-	e := entity.OrderEntity{
-		ID:        order.ID,
-		Total:     order.Total,
-		CreatedAt: order.CreatedAt,
-		UpdatedAt: order.UpdatedAt,
+func (r *repository) CreateWithItems(ctx context.Context, order *domain.Order, orderItems []*domain.OrderItem) (*domain.Order, error) {
+	err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		orderEntity := entity.OrderEntity{
+			Total:     order.Total,
+			Status:    string(order.Status),
+			CreatedAt: order.CreatedAt,
+			UpdatedAt: order.UpdatedAt,
+		}
+
+		if err := tx.Create(&orderEntity).Error; err != nil {
+			return err
+		}
+
+		order.ID = orderEntity.ID
+
+		itemEntities := make([]*entity.OrderItemEntity, 0, len(orderItems))
+		for _, item := range orderItems {
+			itemEntities = append(itemEntities, &entity.OrderItemEntity{
+				OrderID:   order.ID,
+				ProductID: item.ProductID,
+				Name:      item.Name,
+				Quantity:  item.Quantity,
+				Price:     item.Price,
+			})
+		}
+
+		return tx.Create(&itemEntities).Error
+	})
+	if err != nil {
+		return nil, err
 	}
 
-	if err := r.db.WithContext(ctx).
-		Create(&e).
-		Error; err != nil {
-		return err
-	}
-
-	order.ID = e.ID
-
-	return nil
+	return order, nil
 }
 
 func (r *repository) Update(ctx context.Context, order *domain.Order) error {
 	e := entity.OrderEntity{
 		ID:        order.ID,
 		Total:     order.Total,
+		Status:    string(order.Status),
 		UpdatedAt: order.UpdatedAt,
 	}
 
 	return r.db.WithContext(ctx).
-		Model(&e).
+		Model(&entity.OrderEntity{}).
+		Where("id = ?", order.ID).
 		Updates(&e).
 		Error
 }
@@ -60,10 +78,13 @@ func (r *repository) GetOrderByID(ctx context.Context, orderID int64) (*domain.O
 	}
 
 	return &domain.Order{
-		ID:        e.ID,
-		Total:     e.Total,
-		CreatedAt: e.CreatedAt,
-		UpdatedAt: e.UpdatedAt,
+		ID:          e.ID,
+		Total:       e.Total,
+		Status:      domain.OrderStatus(e.Status),
+		CancelledAt: e.CancelledAt,
+		CompletedAt: e.CompletedAt,
+		CreatedAt:   e.CreatedAt,
+		UpdatedAt:   e.UpdatedAt,
 	}, nil
 }
 
@@ -76,10 +97,13 @@ func (r *repository) GetOrders(ctx context.Context) []domain.Order {
 	d := make([]domain.Order, 0)
 	for _, en := range e {
 		d = append(d, domain.Order{
-			ID:        en.ID,
-			Total:     en.Total,
-			CreatedAt: en.CreatedAt,
-			UpdatedAt: en.UpdatedAt,
+			ID:          en.ID,
+			Total:       en.Total,
+			Status:      domain.OrderStatus(en.Status),
+			CancelledAt: en.CancelledAt,
+			CompletedAt: en.CompletedAt,
+			CreatedAt:   en.CreatedAt,
+			UpdatedAt:   en.UpdatedAt,
 		})
 	}
 
@@ -96,6 +120,7 @@ func (r *repository) GetItems(ctx context.Context, orderID int64) []domain.Order
 	for _, en := range e {
 		d = append(d, domain.OrderItem{
 			ID:        en.ID,
+			ProductID: en.ProductID,
 			Name:      en.Name,
 			Price:     en.Price,
 			Quantity:  en.Quantity,
