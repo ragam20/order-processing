@@ -13,6 +13,7 @@ import (
 type PaymentEntity struct {
 	ID      uuid.UUID `gorm:"type:uuid;primaryKey"`
 	OrderID int64     `gorm:"not null"`
+	Amount  int64     `gorm:"not null"`
 	Method  string
 	Status  domain.PaymentStatus `gorm:"not null;type:varchar(25);check:payment_status_check,status IN ('AUTHORIZED', 'PENDING', 'PAID', 'PROCESSING', 'FAILED', 'CANCELLED', 'EXPIRED', 'REFUND')"`
 
@@ -23,6 +24,7 @@ type PaymentEntity struct {
 	CheckoutURL      string `gorm:"not null"`
 	PaymentToken     string
 	ResponseProvider json.RawMessage
+	PaidAt           *time.Time
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

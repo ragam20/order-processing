@@ -30,6 +30,8 @@ func (u *CreatePaymentUseCase) Execute(ctx context.Context, input in.CreatePayme
 	}
 
 	if err := u.repo.Create(ctx, &domain.Payment{
+		OrderID:               input.OrderID,
+		Amount:                input.TotalAmount,
 		Status:                domain.PaymentStatusPending,
 		Provider:              u.provider.GetProviderName(),
 		ProviderReference:     providerRes.ProviderReference,

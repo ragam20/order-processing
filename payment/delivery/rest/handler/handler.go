@@ -13,14 +13,12 @@ import (
 )
 
 type Handler struct {
-	processPaymentUC   *usecase.ProcessPaymentUseCase
 	createPaymentUC    *usecase.CreatePaymentUseCase
 	getStatusPaymentUC *usecase.GetPaymentStatus
 }
 
-func NewHandler(processPaymentUC *usecase.ProcessPaymentUseCase, createPaymentUC *usecase.CreatePaymentUseCase, getStatusPaymentUC *usecase.GetPaymentStatus) *Handler {
+func NewHandler(createPaymentUC *usecase.CreatePaymentUseCase, getStatusPaymentUC *usecase.GetPaymentStatus) *Handler {
 	return &Handler{
-		processPaymentUC:   processPaymentUC,
 		createPaymentUC:    createPaymentUC,
 		getStatusPaymentUC: getStatusPaymentUC,
 	}

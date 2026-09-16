@@ -8,6 +8,7 @@ import (
 )
 
 type PaymentNotificationResult struct {
+	Provider              string
 	ProviderReference     string
 	ProviderTransactionID string
 	Status                domain.PaymentStatus

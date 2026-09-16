@@ -4,5 +4,6 @@ import "context"
 
 type Repository interface {
 	Create(ctx context.Context, payment *Payment, orderID int64) error
-	Update(ctx context.Context, payment *Payment, orderID int64) error
+	GetByProviderReference(ctx context.Context, providerReference string) (*Payment, error)
+	Update(ctx context.Context, payment *Payment) error
 }

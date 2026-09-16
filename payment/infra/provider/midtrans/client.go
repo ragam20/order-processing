@@ -150,6 +150,7 @@ func (mt *midtransProvider) ParseWebhook(input in.ParseWebhook) (out.PaymentNoti
 	}
 
 	return out.PaymentNotificationResult{
+		Provider:              mt.GetProviderName(),
 		ProviderReference:     notification.OrderID,
 		ProviderTransactionID: notification.TransactionID,
 		Status:                status,

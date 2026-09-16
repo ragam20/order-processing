@@ -22,6 +22,8 @@ var (
 
 type Payment struct {
 	ID                    uuid.UUID
+	OrderID               int64
+	Amount                int64
 	Status                PaymentStatus
 	Provider              string
 	ProviderReference     string
@@ -30,6 +32,7 @@ type Payment struct {
 	CheckoutURL      string
 	PaymentToken     string
 	ResponseProvider json.RawMessage
+	PaidAt           *time.Time
 
 	CreatedAt time.Time
 	UpdatedAt time.Time

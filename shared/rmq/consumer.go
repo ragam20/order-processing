@@ -15,7 +15,11 @@ type ConsumerConfig struct {
 
 type MessageHandler func(ctx context.Context, message amqp.Delivery) error
 
-type Consumer struct {
+type Consumer interface {
+	Start(ctx context.Context)
+}
+
+type consumer struct {
 	conn       *amqp.Connection
 	channel    *amqp.Channel
 	deliveries <-chan amqp.Delivery
@@ -26,7 +30,7 @@ func NewConsumer(
 	conn *amqp.Connection,
 	config ConsumerConfig,
 	handler MessageHandler,
-) (*Consumer, error) {
+) (Consumer, error) {
 	ch, err := conn.Channel()
 	if err != nil {
 		return nil, err
@@ -89,7 +93,7 @@ func NewConsumer(
 		return nil, err
 	}
 
-	return &Consumer{
+	return &consumer{
 		conn:       conn,
 		channel:    ch,
 		deliveries: deliveries,
@@ -97,7 +101,7 @@ func NewConsumer(
 	}, nil
 }
 
-func (c *Consumer) Start(ctx context.Context) {
+func (c *consumer) Start(ctx context.Context) {
 	go func() {
 		defer func() {
 			_ = c.channel.Close()
@@ -115,6 +119,7 @@ func (c *Consumer) Start(ctx context.Context) {
 
 				if err := c.handler(ctx, delivery); err != nil {
 					_ = delivery.Nack(false, false)
+					continue
 				}
 
 				_ = delivery.Ack(false)

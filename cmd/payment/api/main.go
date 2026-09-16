@@ -8,8 +8,10 @@ import (
 	paymenthandler "ops/payment/delivery/rest/handler"
 	"ops/payment/delivery/rest/router"
 	paymentdb "ops/payment/infra/database"
+	"ops/payment/infra/messaging"
 	"ops/payment/infra/provider/midtrans"
 	"ops/shared/config"
+	"ops/shared/rmq"
 	"ops/shared/server"
 )
 
@@ -29,12 +31,23 @@ func main() {
 
 	repository := paymentdb.NewRepository(db)
 	provider := midtrans.New(env)
-	processPaymentUseCase := paymentusecase.NewProcessPaymentUseCase()
+	mqConnection, err := rmq.Connect(*env)
+	if err != nil {
+		panic(err)
+	}
+	defer mqConnection.Close()
+
+	rmqPublisher := rmq.NewPublisher(mqConnection)
+	paymentEventPublisher := messaging.NewPaymentEventPublisher(rmqPublisher)
+	processStatusPaymentUseCase := paymentusecase.NewProcessStatusPaymentUseCase(repository, paymentEventPublisher)
 	createPaymentUseCase := paymentusecase.NewCreatePaymentUseCase(repository, provider)
 	getStatusPaymentUseCase := paymentusecase.NewGetPaymentStatus(provider)
-	h := paymenthandler.NewHandler(processPaymentUseCase, createPaymentUseCase, getStatusPaymentUseCase)
+
+	h := paymenthandler.NewHandler(createPaymentUseCase, getStatusPaymentUseCase)
+	wbHandler := paymenthandler.NewWebHookHandler(processStatusPaymentUseCase, provider)
 
 	router.NewRoutes(appServer, h)
+	router.NewWebhooks(appServer, wbHandler)
 
 	port := env.HTTP.PaymentPort
 	if port == 0 {
