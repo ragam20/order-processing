@@ -35,7 +35,6 @@ func (h *WebhookHandler) MidtransNotification(c *gin.Context) {
 
 	notification, err := h.paymentProvider.ParseWebhook(in.ParseWebhook{
 		Payload: payload,
-		Headers: c.Request.Header,
 	})
 	if err != nil {
 		c.Status(http.StatusBadRequest)
