@@ -9,25 +9,30 @@ x-app: &app
   restart: no
 
 x-env: &env
-  HTTP_PORT: "${HTTP_PORT}"
   ORDER_HTTP_PORT: "${ORDER_HTTP_PORT:-8080}"
   INVENTORY_HTTP_PORT: "${INVENTORY_HTTP_PORT:-8081}"
   NOTIFICATION_HTTP_PORT: "${NOTIFICATION_HTTP_PORT:-8082}"
   PAYMENT_HTTP_PORT: "${PAYMENT_HTTP_PORT:-8083}"
-  DB_HOST: "${DB_HOST}"
-  DB_USER: "${DB_USER}"
-  DB_PASSWORD: "${DB_PASSWORD}"
-  DB_PORT: "${DB_PORT}"
-  DB_SSLMODE: "${DB_SSLMODE}"
+
+  DB_HOST: "${DB_HOST:-db}"
+  DB_USER: "${DB_USER:-ops}"
+  DB_PASSWORD: "${DB_PASSWORD:-ops}"
+  DB_PORT: "${DB_PORT:-5432}"
+  DB_SSLMODE: "${DB_SSLMODE:-disable}"
   DB_ORDER_NAME: "${DB_ORDER_NAME:-order_db}"
   DB_INVENTORY_NAME: "${DB_INVENTORY_NAME:-inventory_db}"
   DB_NOTIFICATION_NAME: "${DB_NOTIFICATION_NAME:-notification_db}"
   DB_PAYMENT_NAME: "${DB_PAYMENT_NAME:-payment_db}"
-  MQ_USER: "${MQ_USER}"
-  MQ_PASSWORD: "${MQ_PASSWORD}"
-  MQ_HOST: "${MQ_HOST}"
-  MQ_PORT: "${MQ_PORT}"
-  MQ_VHOST: "${MQ_VHOST}"
+  
+  MQ_USER: "${MQ_USER:-ops}"
+  MQ_PASSWORD: "${MQ_PASSWORD:-ops}"
+  MQ_HOST: "${MQ_HOST:-rabbitmq}"
+  MQ_PORT: "${MQ_PORT:-5672}"
+  MQ_VHOST: "${MQ_VHOST:-/}"
+  
+  MIDTRANS_MERCHANT_ID: "${MIDTRANS_MERCHANT_ID}"
+  MIDTRANS_SERVER_KEY: "${MIDTRANS_SERVER_KEY}"
+  MIDTRANS_SANDBOX_URL: "${MIDTRANS_SANDBOX_URL}"
 
 services:
   order:
@@ -78,9 +83,10 @@ services:
     image: postgres:15
     container_name: ops_db
     ports:
-      - "${DB_PORT}:${DB_PORT}"
+      - "${DB_EXTERNAL_PORT:-5432}:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+      - ./docker/postgres/01-create-databases.sh:/docker-entrypoint-initdb.d/01-create-databases.sh:ro
     restart: no
     environment:
       POSTGRES_USER: "${DB_USER}"
