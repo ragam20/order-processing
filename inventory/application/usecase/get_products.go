@@ -52,11 +52,9 @@ func (u *GetProductsUseCase) Execute(ctx context.Context, page int, limit int) (
 	}
 
 	hasMore := len(products) > limit
-	if hasMore {
-		products = products[:limit]
-	}
 	nextPage := page
 	if hasMore {
+		products = products[:limit]
 		nextPage++
 	}
 
