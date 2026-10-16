@@ -6,8 +6,9 @@ import (
 
 type Repository interface {
 	Create(ctx context.Context, product *Product) error
+	CreateBulk(ctx context.Context, products []Product) error
 	Update(ctx context.Context, product *Product) error
-	GetProducts(ctx context.Context) []Product
+	GetProducts(ctx context.Context, limit int, offset int) ([]Product, error)
 	GetProductByID(ctx context.Context, productID int64) (*Product, error)
 	GetProductByIDs(ctx context.Context, ids []int64) ([]Product, error)
 }

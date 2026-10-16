@@ -31,8 +31,9 @@ func main() {
 	getProductsUseCase := inventoryusecase.NewGetProductsUseCase(repository)
 	getProductByIDUseCase := inventoryusecase.NewGetProductByIDUseCase(repository)
 	checkAvailabilityUseCase := inventoryusecase.NewCheckAvailability(repository)
+	createProductsUseCase := inventoryusecase.NewCreateProductsUseCase(repository)
 
-	h := inventoryhandler.NewHandler(getProductsUseCase, getProductByIDUseCase, checkAvailabilityUseCase)
+	h := inventoryhandler.NewHandler(getProductsUseCase, getProductByIDUseCase, checkAvailabilityUseCase, createProductsUseCase)
 
 	router.NewRoutes(appServer, h)
 
