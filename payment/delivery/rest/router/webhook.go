@@ -11,6 +11,6 @@ func NewWebhooks(g *gin.Engine, w *handler.WebhookHandler) {
 
 	midtrans := api.Group("/midtrans")
 	{
-		midtrans.POST("/dev/notification", w.MidtransNotification)
+		midtrans.POST("/notification", w.MidtransNotification)
 	}
 }
