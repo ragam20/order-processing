@@ -32,6 +32,32 @@ func (r *repository) Create(ctx context.Context, product *domain.Product) error 
 	return nil
 }
 
+func (r *repository) CreateBulk(ctx context.Context, products []domain.Product) error {
+	entities := make([]entity.ProductEntity, 0, len(products))
+	for _, product := range products {
+		entities = append(entities, entity.ProductEntity{
+			Name:      product.Name,
+			Available: product.Available,
+			Price:     product.Price,
+			ImageURL:  product.ImageURL,
+			CreatedAt: product.CreatedAt,
+			UpdatedAt: product.UpdatedAt,
+		})
+	}
+
+	if err := r.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		return tx.Create(&entities).Error
+	}); err != nil {
+		return err
+	}
+
+	for i := range entities {
+		products[i].ID = entities[i].ID
+	}
+
+	return nil
+}
+
 func (r *repository) GetProductByIDs(ctx context.Context, ids []int64) ([]domain.Product, error) {
 	var e []entity.ProductEntity
 

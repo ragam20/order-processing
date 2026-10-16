@@ -22,4 +22,6 @@ func NewRoutes(g *gin.Engine, h *handler.Handler) {
 
 		internal.POST("/check-availability", h.CheckAvailabilityItems)
 	}
+
+	api.POST("/products/bulk", h.CreateProducts)
 }

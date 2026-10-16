@@ -16,14 +16,62 @@ type Handler struct {
 	getProductsUC       *usecase.GetProductsUseCase
 	getProductByIDUC    *usecase.GetProductByIDUseCase
 	checkAvailabilityUC *usecase.CheckAvailabilityUseCase
+	createProductsUC    *usecase.CreateProductsUseCase
 }
 
-func NewHandler(getProductsUC *usecase.GetProductsUseCase, getProductByIDUC *usecase.GetProductByIDUseCase, checkAvailabilityUC *usecase.CheckAvailabilityUseCase) *Handler {
+func NewHandler(getProductsUC *usecase.GetProductsUseCase, getProductByIDUC *usecase.GetProductByIDUseCase, checkAvailabilityUC *usecase.CheckAvailabilityUseCase, createProductsUC *usecase.CreateProductsUseCase) *Handler {
 	return &Handler{
 		getProductsUC:       getProductsUC,
 		getProductByIDUC:    getProductByIDUC,
 		checkAvailabilityUC: checkAvailabilityUC,
+		createProductsUC:    createProductsUC,
 	}
+}
+
+func (h *Handler) CreateProducts(c *gin.Context) {
+	var req request.CreateProductsRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		_ = c.Error(&app.AppError{
+			Code:    app.CodeInvalidRequest,
+			Message: "invalid request body",
+			Err:     err,
+		})
+		return
+	}
+
+	input := make([]in.CreateProductInput, 0, len(req.Items))
+	for _, item := range req.Items {
+		input = append(input, in.CreateProductInput{
+			Name:      item.Name,
+			ImageURL:  item.ImageURL,
+			Price:     item.Price,
+			Available: item.Available,
+		})
+	}
+
+	products, err := h.createProductsUC.Execute(c.Request.Context(), input)
+	if err != nil {
+		c.Error(err)
+		return
+	}
+
+	resp := make([]response.ProductResponse, 0, len(products))
+	for _, product := range products {
+		resp = append(resp, response.ProductResponse{
+			ID:        product.ID,
+			Name:      product.Name,
+			ImageURL:  product.ImageURL,
+			Price:     product.Price,
+			Available: product.Available,
+			CreatedAt: product.CreatedAt,
+			UpdatedAt: product.UpdatedAt,
+		})
+	}
+
+	c.JSON(http.StatusCreated, &app.AppResponse[[]response.ProductResponse]{
+		Success: true,
+		Data:    &resp,
+	})
 }
 
 func (h *Handler) GetProducts(c *gin.Context) {
