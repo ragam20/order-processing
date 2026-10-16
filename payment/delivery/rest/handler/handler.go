@@ -45,11 +45,11 @@ func (h *Handler) CreatePayment(c *gin.Context) {
 	}
 
 	result, err := h.createPaymentUC.Execute(c.Request.Context(), in.CreatePaymentInput{
-		OrderID:     req.OrderID,
-		TotalAmount: req.TotalAmount,
-		Items:       items,
-		Customer:    in.Customer{ID: req.Customer.ID, Name: req.Customer.Name, Email: req.Customer.Email, Phone: req.Customer.Phone},
-		FinishURL:   req.FinishURL,
+		OrderID:   req.OrderID,
+		Amount:    req.TotalAmount,
+		Items:     items,
+		Customer:  in.Customer{ID: req.Customer.ID, Name: req.Customer.Name, Email: req.Customer.Email, Phone: req.Customer.Phone},
+		FinishURL: req.FinishURL,
 	})
 	if err != nil {
 		c.JSON(http.StatusBadGateway, app.AppResponse[any]{

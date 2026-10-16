@@ -8,4 +8,5 @@ import (
 
 type PaymentEventPublisher interface {
 	PublishPaymentStatusChanged(ctx context.Context, event out.PaymentStatusChangedEvent) error
+	PublishPaymentCreated(ctx context.Context, event out.PaymentCreatedEvent) error
 }

@@ -40,6 +40,21 @@ func (p *paymentEventPublisher) PublishPaymentStatusChanged(ctx context.Context,
 	)
 }
 
+func (p *paymentEventPublisher) PublishPaymentCreated(ctx context.Context, paymentEvent out.PaymentCreatedEvent) error {
+	data, err := json.Marshal(paymentEvent)
+	if err != nil {
+		return err
+	}
+
+	return p.publisher.Publish(
+		ctx,
+		PaymentEventsExchange,
+		event.ExchangeTypeTopic,
+		PaymentCreatedRoutingKey,
+		data,
+	)
+}
+
 func routingKeyFor(status domain.PaymentStatus) (string, error) {
 	switch status {
 	case domain.PaymentStatusPaid:

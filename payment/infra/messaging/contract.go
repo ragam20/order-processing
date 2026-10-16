@@ -5,4 +5,5 @@ const (
 	PaymentPaidRoutingKey    = "payment.paid"
 	PaymentFailedRoutingKey  = "payment.failed"
 	PaymentExpiredRoutingKey = "payment.expired"
+	PaymentCreatedRoutingKey = "payment.created"
 )

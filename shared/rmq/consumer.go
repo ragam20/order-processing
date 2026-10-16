@@ -10,7 +10,7 @@ type ConsumerConfig struct {
 	ExchangeName string
 	ExchangeType string
 	QueueName    string
-	BindingKey   string
+	BindingKeys  []string
 }
 
 type MessageHandler func(ctx context.Context, message amqp.Delivery) error
@@ -67,16 +67,18 @@ func NewConsumer(
 		return nil, err
 	}
 
-	err = ch.QueueBind(
-		q.Name,
-		config.BindingKey,
-		config.ExchangeName,
-		false,
-		nil,
-	)
-	if err != nil {
-		_ = ch.Close()
-		return nil, err
+	for _, bindingKey := range config.BindingKeys {
+		err = ch.QueueBind(
+			q.Name,
+			bindingKey,
+			config.ExchangeName,
+			false,
+			nil,
+		)
+		if err != nil {
+			_ = ch.Close()
+			return nil, err
+		}
 	}
 
 	deliveries, err := ch.Consume(

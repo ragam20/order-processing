@@ -55,10 +55,12 @@ func (r *repository) CreateWithItems(ctx context.Context, order *domain.Order, o
 
 func (r *repository) Update(ctx context.Context, order *domain.Order) error {
 	e := entity.OrderEntity{
-		ID:        order.ID,
-		Total:     order.Total,
-		Status:    string(order.Status),
-		UpdatedAt: order.UpdatedAt,
+		ID:          order.ID,
+		Total:       order.Total,
+		Status:      string(order.Status),
+		CancelledAt: order.CancelledAt,
+		CompletedAt: order.CompletedAt,
+		UpdatedAt:   order.UpdatedAt,
 	}
 
 	return r.db.WithContext(ctx).

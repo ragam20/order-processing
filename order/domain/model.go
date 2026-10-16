@@ -23,32 +23,42 @@ type Order struct {
 	UpdatedAt   time.Time
 }
 
-func (o *Order) Completed() error {
-	if o.Status == OrderSuccess {
+func (o *Order) ChangeStatus(status OrderStatus, now time.Time) error {
+	if o.Status == status {
 		return nil
 	}
 
-	if o.Status != OrderCancelled {
-		return ErrOrderSuccess
+	switch status {
+	case OrderPending, OrderProcess:
+		if o.Status == OrderCancelled || o.Status == OrderSuccess {
+			return ErrInvalidOrderStatus
+		}
+	case OrderCancelled:
+		if o.Status == OrderSuccess {
+			return ErrInvalidOrderStatus
+		}
+		o.CancelledAt = &now
+	case OrderSuccess:
+		if o.Status == OrderCancelled {
+			return ErrInvalidOrderStatus
+		}
+		o.CompletedAt = &now
+	default:
+		return ErrInvalidOrderStatus
 	}
 
-	t := time.Now()
-	o.CompletedAt = &t
-	o.Status = OrderSuccess
+	o.Status = status
+	o.UpdatedAt = now
 
 	return nil
 }
 
+func (o *Order) Completed() error {
+	return o.ChangeStatus(OrderSuccess, time.Now().UTC())
+}
+
 func (o *Order) Cancel() error {
-	if o.Status != OrderProcess {
-		return ErrOrderCanceled
-	}
-
-	t := time.Now()
-	o.CancelledAt = &t
-	o.Status = OrderCancelled
-
-	return nil
+	return o.ChangeStatus(OrderCancelled, time.Now().UTC())
 }
 
 type OrderItem struct {

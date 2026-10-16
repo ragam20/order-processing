@@ -15,9 +15,9 @@ type Item struct {
 }
 
 type CreatePaymentInput struct {
-	OrderID     int64
-	TotalAmount int64
-	Items       []Item
-	Customer    Customer
-	FinishURL   string
+	OrderID   int64
+	Amount    int64
+	Items     []Item
+	Customer  Customer
+	FinishURL string
 }

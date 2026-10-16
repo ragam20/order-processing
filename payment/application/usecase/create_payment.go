@@ -11,12 +11,13 @@ import (
 )
 
 type CreatePaymentUseCase struct {
-	repo     domain.Repository
-	provider application.PaymentProvider
+	repo      domain.Repository
+	provider  application.PaymentProvider
+	publisher application.PaymentEventPublisher
 }
 
-func NewCreatePaymentUseCase(repo domain.Repository, provider application.PaymentProvider) *CreatePaymentUseCase {
-	return &CreatePaymentUseCase{repo: repo, provider: provider}
+func NewCreatePaymentUseCase(repo domain.Repository, provider application.PaymentProvider, publisher application.PaymentEventPublisher) *CreatePaymentUseCase {
+	return &CreatePaymentUseCase{repo: repo, provider: provider, publisher: publisher}
 }
 
 func (u *CreatePaymentUseCase) Execute(ctx context.Context, input in.CreatePaymentInput) (out.PaymentResult, *app.AppError) {
@@ -31,7 +32,7 @@ func (u *CreatePaymentUseCase) Execute(ctx context.Context, input in.CreatePayme
 
 	if err := u.repo.Create(ctx, &domain.Payment{
 		OrderID:               input.OrderID,
-		Amount:                input.TotalAmount,
+		Amount:                input.Amount,
 		Status:                domain.PaymentStatusPending,
 		Provider:              u.provider.GetProviderName(),
 		ProviderReference:     providerRes.ProviderReference,
@@ -48,6 +49,15 @@ func (u *CreatePaymentUseCase) Execute(ctx context.Context, input in.CreatePayme
 	}
 
 	providerRes.Status = string(domain.PaymentStatusPending)
+
+	_ = u.publisher.PublishPaymentCreated(ctx, out.PaymentCreatedEvent{
+		OrderID:           input.OrderID,
+		Amount:            input.Amount,
+		Provider:          u.provider.GetProviderName(),
+		ProviderReference: providerRes.ProviderReference,
+		CheckoutURL:       providerRes.CheckoutURL,
+		ExpiresAt:         nil,
+	})
 
 	return providerRes, nil
 }

@@ -31,7 +31,7 @@ func main() {
 
 	repository := paymentdb.NewRepository(db)
 	provider := midtrans.New(env)
-	mqConnection, err := rmq.Connect(*env)
+	mqConnection, err := rmq.NewConnection(env)
 	if err != nil {
 		panic(err)
 	}
@@ -40,7 +40,7 @@ func main() {
 	rmqPublisher := rmq.NewPublisher(mqConnection)
 	paymentEventPublisher := messaging.NewPaymentEventPublisher(rmqPublisher)
 	processStatusPaymentUseCase := paymentusecase.NewProcessStatusPaymentUseCase(repository, paymentEventPublisher)
-	createPaymentUseCase := paymentusecase.NewCreatePaymentUseCase(repository, provider)
+	createPaymentUseCase := paymentusecase.NewCreatePaymentUseCase(repository, provider, paymentEventPublisher)
 	getStatusPaymentUseCase := paymentusecase.NewGetPaymentStatus(provider)
 
 	h := paymenthandler.NewHandler(createPaymentUseCase, getStatusPaymentUseCase)

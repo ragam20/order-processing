@@ -65,7 +65,7 @@ func (mt *midtransProvider) CreatePayment(ctx context.Context, input in.CreatePa
 	req := &snap.Request{
 		TransactionDetails: midtrans.TransactionDetails{
 			OrderID:  strconv.FormatInt(input.OrderID, 10),
-			GrossAmt: input.TotalAmount,
+			GrossAmt: input.Amount,
 		},
 		Items: mdItems,
 		CustomerDetail: &midtrans.CustomerDetails{

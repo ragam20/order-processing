@@ -9,7 +9,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-func Connect(cfg config.Env) (*amqp.Connection, error) {
+func NewConnection(cfg *config.Env) (*amqp.Connection, error) {
 	vhost := url.PathEscape(cfg.MQ.VHost)
 
 	connAddr := fmt.Sprintf(
