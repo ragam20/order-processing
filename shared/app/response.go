@@ -3,6 +3,7 @@ package app
 type AppResponse[T any] struct {
 	Success bool       `json:"success"`
 	Data    *T         `json:"data,omitempty"`
+	Meta    any        `json:"meta,omitempty"`
 	Error   *ErrorInfo `json:"error,omitempty"`
 
 	// for development

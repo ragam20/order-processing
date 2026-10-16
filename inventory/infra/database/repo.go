@@ -95,14 +95,18 @@ func (r *repository) Update(ctx context.Context, product *domain.Product) error 
 	return r.db.WithContext(ctx).Model(&entity.ProductEntity{}).Updates(e).Error
 }
 
-func (r *repository) GetProducts(ctx context.Context) []domain.Product {
+func (r *repository) GetProducts(ctx context.Context, limit int, offset int) ([]domain.Product, error) {
 	var e []entity.ProductEntity
 
-	if err := r.db.Find(&e).Error; err != nil {
-		return []domain.Product{}
+	if err := r.db.WithContext(ctx).
+		Order("id ASC").
+		Limit(limit).
+		Offset(offset).
+		Find(&e).Error; err != nil {
+		return []domain.Product{}, err
 	}
 
-	p := make([]domain.Product, 0)
+	p := make([]domain.Product, 0, len(e))
 	for _, v := range e {
 		p = append(p, domain.Product{
 			ID:        v.ID,
@@ -115,7 +119,7 @@ func (r *repository) GetProducts(ctx context.Context) []domain.Product {
 		})
 	}
 
-	return p
+	return p, nil
 }
 
 func (r *repository) GetProductByID(ctx context.Context, productID int64) (*domain.Product, error) {

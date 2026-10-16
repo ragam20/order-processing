@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"ops/inventory/application/in"
 	"ops/inventory/application/usecase"
@@ -75,6 +76,64 @@ func (h *Handler) CreateProducts(c *gin.Context) {
 }
 
 func (h *Handler) GetProducts(c *gin.Context) {
+	page, err := parseQueryInt(c, "page")
+	if err != nil {
+		c.Error(&app.AppError{
+			Code:    app.CodeInvalidRequest,
+			Message: "page must be a valid integer",
+			Err:     err,
+		})
+		return
+	}
+
+	limit, err := parseQueryInt(c, "limit")
+	if err != nil {
+		c.Error(&app.AppError{
+			Code:    app.CodeInvalidRequest,
+			Message: "limit must be a valid integer",
+			Err:     err,
+		})
+		return
+	}
+
+	result, appErr := h.getProductsUC.Execute(c.Request.Context(), page, limit)
+	if appErr != nil {
+		c.Error(appErr)
+		return
+	}
+
+	products := make([]response.ProductResponse, 0, len(result.Products))
+	for _, product := range result.Products {
+		products = append(products, response.ProductResponse{
+			ID:        product.ID,
+			Name:      product.Name,
+			ImageURL:  product.ImageURL,
+			Price:     product.Price,
+			Available: product.Available,
+			CreatedAt: product.CreatedAt,
+			UpdatedAt: product.UpdatedAt,
+		})
+	}
+
+	c.JSON(http.StatusOK, &app.AppResponse[[]response.ProductResponse]{
+		Success: true,
+		Data:    &products,
+		Meta: map[string]any{
+			"page":     result.Page,
+			"limit":    result.Limit,
+			"nextPage": result.NextPage,
+			"hasMore":  result.HasMore,
+		},
+	})
+}
+
+func parseQueryInt(c *gin.Context, key string) (int, error) {
+	value := c.Query(key)
+	if value == "" {
+		return 0, nil
+	}
+
+	return strconv.Atoi(value)
 }
 
 func (h *Handler) GetProductByID(c *gin.Context) {
