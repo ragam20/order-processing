@@ -6,12 +6,14 @@ COPY go.mod go.sum ./
 RUN go mod download
 
 COPY . .
-RUN go build -o /bin/order ./cmd/api/order && \
-  go build -o /bin/inventory ./cmd/api/inventory && \
-  go build -o /bin/notification ./cmd/api/notification && \
-  go build -o /bin/payment ./cmd/api/payment
+RUN go build -o /bin/order ./cmd/order/api && \
+  go build -o /bin/inventory ./cmd/inventory/api && \
+  go build -o /bin/notification ./cmd/notification/api && \
+  go build -o /bin/payment ./cmd/payment/api
 
 FROM alpine:3
+
+RUN apk add --no-cache ca-certificates
 
 WORKDIR /app
 
