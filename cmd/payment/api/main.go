@@ -42,8 +42,9 @@ func main() {
 	processStatusPaymentUseCase := paymentusecase.NewProcessStatusPaymentUseCase(repository, paymentEventPublisher)
 	createPaymentUseCase := paymentusecase.NewCreatePaymentUseCase(repository, provider, paymentEventPublisher)
 	getStatusPaymentUseCase := paymentusecase.NewGetPaymentStatus(provider)
+	getPaymentByOrderIDUseCase := paymentusecase.NewGetPaymentByOrderIDUseCase(repository)
 
-	h := paymenthandler.NewHandler(createPaymentUseCase, getStatusPaymentUseCase)
+	h := paymenthandler.NewHandler(createPaymentUseCase, getStatusPaymentUseCase, getPaymentByOrderIDUseCase)
 	wbHandler := paymenthandler.NewWebHookHandler(processStatusPaymentUseCase, provider)
 
 	router.NewRoutes(appServer, h)
