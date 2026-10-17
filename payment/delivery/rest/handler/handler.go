@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 
 	"ops/payment/application/in"
 	"ops/payment/application/usecase"
@@ -13,14 +14,20 @@ import (
 )
 
 type Handler struct {
-	createPaymentUC    *usecase.CreatePaymentUseCase
-	getStatusPaymentUC *usecase.GetPaymentStatus
+	createPaymentUC       *usecase.CreatePaymentUseCase
+	getStatusPaymentUC    *usecase.GetPaymentStatus
+	getPaymentByOrderIDUC *usecase.GetPaymentByOrderIDUseCase
 }
 
-func NewHandler(createPaymentUC *usecase.CreatePaymentUseCase, getStatusPaymentUC *usecase.GetPaymentStatus) *Handler {
+func NewHandler(
+	createPaymentUC *usecase.CreatePaymentUseCase,
+	getStatusPaymentUC *usecase.GetPaymentStatus,
+	getPaymentByOrderIDUC *usecase.GetPaymentByOrderIDUseCase,
+) *Handler {
 	return &Handler{
-		createPaymentUC:    createPaymentUC,
-		getStatusPaymentUC: getStatusPaymentUC,
+		createPaymentUC:       createPaymentUC,
+		getStatusPaymentUC:    getStatusPaymentUC,
+		getPaymentByOrderIDUC: getPaymentByOrderIDUC,
 	}
 }
 
@@ -99,6 +106,51 @@ func (h *Handler) GetStatusPayment(c *gin.Context) {
 			ProviderTransactionID: result.ProviderTransactionID,
 			Amount:                result.Amount,
 			PaidAt:                result.PaidAt,
+		},
+	})
+}
+
+func (h *Handler) GetPaymentByOrderID(c *gin.Context) {
+	orderID, err := strconv.ParseInt(c.Param("orderId"), 10, 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, app.AppResponse[any]{
+			Success: false,
+			Error:   &app.ErrorInfo{Code: app.CodeInvalidRequest, Message: "order id must be a valid integer"},
+		})
+		return
+	}
+
+	result, appErr := h.getPaymentByOrderIDUC.Execute(c.Request.Context(), orderID)
+	if appErr != nil {
+		status := http.StatusInternalServerError
+		if appErr.Code == app.CodeInvalidRequest {
+			status = http.StatusBadRequest
+		} else if appErr.Code == app.CodeNotFound {
+			status = http.StatusNotFound
+		}
+
+		c.JSON(status, app.AppResponse[any]{
+			Success: false,
+			Error:   &app.ErrorInfo{Code: appErr.Code, Message: appErr.Message},
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, app.AppResponse[response.GetPaymentByOrderIDResponse]{
+		Success: true,
+		Data: &response.GetPaymentByOrderIDResponse{
+			ID:                    result.ID,
+			OrderID:               result.OrderID,
+			Amount:                result.Amount,
+			Status:                result.Status,
+			Provider:              result.Provider,
+			ProviderReference:     result.ProviderReference,
+			ProviderTransactionID: result.ProviderTransactionID,
+			CheckoutURL:           result.CheckoutURL,
+			PaymentToken:          result.PaymentToken,
+			PaidAt:                result.PaidAt,
+			CreatedAt:             result.CreatedAt,
+			UpdatedAt:             result.UpdatedAt,
 		},
 	})
 }

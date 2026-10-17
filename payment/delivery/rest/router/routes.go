@@ -10,6 +10,7 @@ import (
 
 func NewRoutes(g *gin.Engine, h *handler.Handler) {
 	api := g.Group("/api")
+	api.GET("/payments/orders/:orderId", h.GetPaymentByOrderID)
 
 	internal := api.Group("/internal/payment")
 	{

@@ -40,6 +40,35 @@ func (r *repository) Create(ctx context.Context, payment *domain.Payment, orderI
 	return nil
 }
 
+func (r *repository) GetByOrderID(ctx context.Context, orderID int64) (*domain.Payment, error) {
+	var e entity.PaymentEntity
+	if err := r.db.WithContext(ctx).
+		Where("order_id = ?", orderID).
+		Order("created_at DESC").
+		First(&e).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, domain.ErrPaymentNotFound
+		}
+		return nil, err
+	}
+
+	return &domain.Payment{
+		ID:                    e.ID,
+		OrderID:               e.OrderID,
+		Amount:                e.Amount,
+		Status:                e.Status,
+		Provider:              e.Provider,
+		ProviderReference:     e.ProviderReference,
+		ProviderTransactionID: e.ProviderTransactionID,
+		CheckoutURL:           e.CheckoutURL,
+		PaymentToken:          e.PaymentToken,
+		ResponseProvider:      e.ResponseProvider,
+		PaidAt:                e.PaidAt,
+		CreatedAt:             e.CreatedAt,
+		UpdatedAt:             e.UpdatedAt,
+	}, nil
+}
+
 func (r *repository) GetByProviderReference(ctx context.Context, providerReference string) (*domain.Payment, error) {
 	var e entity.PaymentEntity
 	if err := r.db.WithContext(ctx).Where("provider_reference = ?", providerReference).First(&e).Error; err != nil {
