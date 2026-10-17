@@ -52,10 +52,12 @@ func main() {
 
 	cancelOrderUC := orderusecase.NewCancelOrderUseCase(repo)
 	getDetailOrderUC := orderusecase.NewGetDetailOrderUseCase(repo)
+	getOrdersUC := orderusecase.NewGetOrdersUseCase(repo)
+	getOrdersByStatusUC := orderusecase.NewGetOrdersByStatusUseCase(repo)
 	checkoutUC := orderusecase.NewCheckoutUseCase(repo, inventorySvc, paymentSvc)
 	processOrderStatusUC := orderusecase.NewProcessOrderStatusUseCase(repo)
 
-	h := orderhandler.NewHandler(cancelOrderUC, getDetailOrderUC, checkoutUC)
+	h := orderhandler.NewHandler(cancelOrderUC, getDetailOrderUC, getOrdersUC, getOrdersByStatusUC, checkoutUC)
 	eh := evHandler.NewEventHandler(processOrderStatusUC)
 
 	processOrderConsumer, err := rmq.NewConsumer(

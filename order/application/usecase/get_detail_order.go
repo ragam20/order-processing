@@ -4,23 +4,24 @@ import (
 	"context"
 	"errors"
 
+	"ops/order/application"
 	"ops/order/application/out"
 	"ops/order/domain"
 	"ops/shared/app"
 )
 
 type GetDetailOrderUseCase struct {
-	repo domain.Repository
+	repo application.OrderQueryRepository
 }
 
-func NewGetDetailOrderUseCase(repo domain.Repository) *GetDetailOrderUseCase {
+func NewGetDetailOrderUseCase(repo application.OrderQueryRepository) *GetDetailOrderUseCase {
 	return &GetDetailOrderUseCase{
 		repo: repo,
 	}
 }
 
-func (u *GetDetailOrderUseCase) Execute(ctx context.Context, orderID int64) (*out.OrderDetailResult, error) {
-	order, err := u.repo.GetOrderByID(ctx, orderID)
+func (u *GetDetailOrderUseCase) Execute(ctx context.Context, orderID int64) (*out.OrderWithItemsResult, error) {
+	order, err := u.repo.GetOrderDetail(ctx, orderID)
 	if err != nil {
 		if errors.Is(err, domain.ErrOrderNotFound) {
 			return nil, &app.AppError{
@@ -36,10 +37,5 @@ func (u *GetDetailOrderUseCase) Execute(ctx context.Context, orderID int64) (*ou
 		}
 	}
 
-	orderItem := u.repo.GetItems(ctx, orderID)
-
-	return &out.OrderDetailResult{
-		Order: order,
-		Items: orderItem,
-	}, nil
+	return order, nil
 }

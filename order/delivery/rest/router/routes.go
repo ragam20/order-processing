@@ -12,6 +12,8 @@ func NewRoutes(g *gin.Engine, h *handler.Handler) {
 	api := g.Group("/api")
 	{
 		api.POST("/checkout", h.Checkout)
+		api.GET("/orders", h.GetOrders)
+		api.GET("/orders/:orderId", h.GetOrderDetail)
 	}
 
 	internal := api.Group("/internal/order")
