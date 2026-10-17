@@ -6,9 +6,8 @@ type CheckoutItemInput struct {
 }
 
 type CheckoutInput struct {
-	Items     []CheckoutItemInput
-	Customer  CustomerInput
-	FinishURL string
+	Items    []CheckoutItemInput
+	Customer CustomerInput
 }
 
 type CustomerInput struct {

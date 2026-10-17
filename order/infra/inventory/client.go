@@ -39,8 +39,8 @@ func (c *inventoryClient) CheckAvailabilityItem(ctx context.Context, input in.Ch
 
 	req, err := http.NewRequestWithContext(
 		ctx,
+		http.MethodPost,
 		c.env.HTTP.InventoryURL+"/api/internal/inventory/check-availability",
-		"application/json",
 		bytes.NewBuffer(body),
 	)
 	if err != nil {

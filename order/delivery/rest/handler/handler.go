@@ -54,7 +54,6 @@ func (h *Handler) Checkout(c *gin.Context) {
 			Email: req.Customer.Email,
 			Phone: req.Customer.Phone,
 		},
-		FinishURL: req.FinishURL,
 	}
 
 	res, err := h.checkoutUC.Execute(c.Request.Context(), ckInput)

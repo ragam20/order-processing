@@ -136,7 +136,6 @@ func (u *CheckoutUseCase) Execute(ctx context.Context, input in.CheckoutInput) (
 		TotalAmount: order.Total,
 		Items:       paymentItems,
 		Customer:    input.Customer,
-		FinishURL:   input.FinishURL,
 	})
 	if paymentErr != nil {
 		paymentResult = out.PaymentResult{Status: "INITIATION_FAILED"}

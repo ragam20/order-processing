@@ -1,9 +1,8 @@
 package request
 
 type CheckoutRequest struct {
-	Items     []CheckoutRequestItem `json:"items"`
-	Customer  CustomerRequest       `json:"customer" binding:"required"`
-	FinishURL string                `json:"finishUrl"`
+	Items    []CheckoutRequestItem `json:"items"`
+	Customer CustomerRequest       `json:"customer" binding:"required"`
 }
 
 type CheckoutRequestItem struct {
