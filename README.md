@@ -46,7 +46,7 @@ if you import code from the *application* into the *domain* layer, the *domain* 
 
 In this project has 4 layers:
 
-![App Architecture Diagram](docs/images/app_architecture.png)
+![App Architecture Diagram](docs/app_architecture.png)
 
 - **Application**: this layer contains application business rules.
 - **Domain**: this layer contains enterprise business rules.
