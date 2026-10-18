@@ -5,7 +5,7 @@ The purpose of this project are:
 - Basic order processing 
 - Integrated payment gateway (Midtrans)
 
-##### Todo
+#### Todo
 
 - [ ] Unit Test
 - [ ] API Gateway 
@@ -14,14 +14,14 @@ The purpose of this project are:
 - [ ] Outbox Pattern
 
 
-##### Tech stack
+#### Tech stack
 - Go
 - Gin (web framework)
 - Rabbitmq
 
 ---
 
-##### Clean Architecture
+### Clean Architecture
 
 Clean Architecture is a software design that seperates an application into layers. The architecture produces systems that are:
 
@@ -42,7 +42,7 @@ For example, the *application* layer can import code from the *domain* layer, bu
 if you import code from the *application* into the *domain* layer, the *domain* layer would be depend on the *application* layer. It violate the rule of the dependency rule
 ```
 
-##### Project Layers
+### Project Layers
 
 In this project has 4 layers:
 
